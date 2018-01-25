@@ -186,6 +186,10 @@
             "us-west-2": {
                 "AMI": "ami-4836a428",
                 "AMZNLINUXHVM": "ami-f2d3638a"
+            },
+            "eu-west-1": {
+                "AMI": "ami-01ccc867",
+                "AMZNLINUXHVM": "ami-d834aba1"
             }
         }
     },
