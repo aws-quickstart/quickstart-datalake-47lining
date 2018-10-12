@@ -20,27 +20,6 @@ Parameters:
       - ml.t2.large
       - ml.t2.xlarge
     Default: ml.t2.large
-  NotebookTrainingInstanceType:
-    Description: The EC2 instance type for the Amazon SageMaker training instance which will be used for model training.
-    ConstraintDescription: Must select a valid Notebook instance type.
-    Type: String
-    AllowedValues:
-      - ml.m5.large
-      - ml.m5.xlarge
-      - ml.m5.2xlarge
-      - ml.m5.4xlarge
-      - ml.c5.xlarge
-      - ml.c5.2xlarge
-      - ml.c5.4xlarge
-      - ml.c5.9xlarge
-    Default: ml.m5.xlarge
-  CuratedBucketName:
-    Description: Name of an existing s3 bucket where data and artifacts will be stored (curated dataset bucket)
-      SageMaker will be granted full access to this bucket.
-    Type: String
-  NotebookS3Path:
-    Description: Name of a path that contains jupyter notebook
-    Type: String
   RegionalLambdaBucketName:
     Description: RegionalLambdaBucket bucket name
     Type: String
@@ -58,9 +37,6 @@ Metadata:
         Parameters:
           - NotebookInstanceName
           - NotebookInstanceType
-          - NotebookTrainingInstanceType
-          - CuratedBucketName
-          - NotebookS3Path
       - Label:
           default: Optional parameters
 Resources:
@@ -84,10 +60,7 @@ Resources:
       ServiceToken: !GetAtt 'CreateNotebookFunction.Arn'
       NotebookInstanceName: !Ref 'NotebookInstanceName'
       NotebookInstanceType: !Ref 'NotebookInstanceType'
-      NotebookTrainingInstanceType: !Ref 'NotebookTrainingInstanceType'
-      CuratedBucketName: !Ref 'CuratedBucketName'
       SageMakerRoleArn: !Ref 'SageMakerExecutionRoleArn'
-      NotebookS3Path: !Ref 'NotebookS3Path'
       Version: 1
 
 Outputs:
@@ -99,15 +72,3 @@ Outputs:
     Description: SageMaker Instance Name
     Value:
       !Ref 'NotebookInstanceName'
-  NotebookName:
-    Description: Notebook name
-    Value:
-      !GetAtt 'CreateNotebookInstance.NotebookName'
-  ModelName:
-    Description: Deployed model name
-    Value:
-      !GetAtt 'CreateNotebookInstance.ModelName'
-  ModelEndpointName:
-    Description: Deployed endpoint name
-    Value:
-      !GetAtt 'CreateNotebookInstance.ModelEndpointName'

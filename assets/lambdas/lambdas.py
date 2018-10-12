@@ -158,69 +158,47 @@ def make_lifecycle_config_name(instance_name):
     return f'{instance_name}-lifecycle-configuration'
 
 
-def create_startup_script(event, region):
-    notebook_bucket_dir = event['ResourceProperties']['NotebookS3Path']
-    s3_config_path = os.path.join(notebook_bucket_dir, 'config.py')
-    s3_notebook_path = os.path.join(notebook_bucket_dir, 'Sagemaker Example - Order Analysis.ipynb')
-    curated_bucket_name = event['ResourceProperties']['CuratedBucketName']
-    model_name = make_model_name(event)
-    endpoint_name = make_endpoint_name(event)
-    sagemaker_training_instance_type = event['ResourceProperties']['NotebookTrainingInstanceType']
-    sagemaker_hosting_instance_type = event['ResourceProperties']['NotebookInstanceType']
-    data_s3_path = f's3:\/\/{curated_bucket_name}\/orders_20170601_json\/dataset=orders\/v=2017-06-01\/p=json\/dt=2017-06-01\/'
-    sagemaker_role_arn = event['ResourceProperties']['SageMakerRoleArn'].replace('/', '\/')
-    script = [{'Content': prepare_proper_content_format(
-                      'cd SageMaker ; mkdir jupyter-notebook ; chmod 777 -R jupyter-notebook; cd jupyter-notebook ; '
-                      f'aws s3 cp "s3://{s3_config_path}" . ; '
-                      f'aws s3 cp "s3://{s3_notebook_path}" . ; '
-                      'JUPYTER_FILE=`ls | grep *.ipynb`; chmod 777 "$JUPYTER_FILE"; '
-                      'CONFIG_FILE=`ls | grep *.py` ; '
-                      f'sed -i -re "s/(DATA_S3_PATH = ).*$/\\1 \\\'{data_s3_path}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(REGION_NAME = ).*$/\\1 \\\'{region}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(SAGEMAKER_S3_BUCKET = ).*$/\\1 \\\'{curated_bucket_name}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(MODEL_NAME = ).*$/\\1 \\\'{model_name}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(ENDPOINT_NAME = ).*$/\\1 \\\'{endpoint_name}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(SAGEMAKER_TRAINING_INSTANCE_TYPE = ).*$/\\1 \\\'{sagemaker_training_instance_type}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(SAGEMAKER_HOSTING_INSTANCE_TYPE = ).*$/\\1 \\\'{sagemaker_hosting_instance_type}\\\'/" $CONFIG_FILE ; '
-                      f'sed -i -re "s/(SAGEMAKER_ROLE_ARN = ).*$/\\1 \\\'{sagemaker_role_arn}\\\'/" $CONFIG_FILE ; '
-                  )}]
-    return {'script' :script,
-            'model_name': model_name,
-            'endpoint_name': endpoint_name,
-            'notebook_name': 'Sagemaker Example - Order Analysis'}
-
-
 def create_lifecycle_config(instance_name, event, region):
     config_name = make_lifecycle_config_name(instance_name)
-    script_with_data = create_startup_script(event, region)
     input_dict = {
         'NotebookInstanceLifecycleConfigName': config_name,
         'OnStart': [{'Content': prepare_proper_content_format('echo "Starting notebook";')}],
-        'OnCreate': script_with_data['script']
     }
     response = sm_client.create_notebook_instance_lifecycle_config(**input_dict)
     print(response)
     if response['ResponseMetadata']['HTTPStatusCode'] == 200:
-        return {'config_name': config_name,
-                'data': script_with_data}
+        return {
+            'config_name': config_name,
+        }
     else:
         raise Exception
 
 
 def delete_notebook_instance(instance_name):
-    def instance_exists():
-        notebooks = sm_client.list_notebook_instances(NameContains=instance_name)
-        return instance_name in [ntbk['NotebookInstanceName'] for ntbk in notebooks['NotebookInstances']]
-    if instance_exists():
+    def _exists_with_status(instance_name, status):
+        notebooks_with_status = sm_client.list_notebook_instances(
+            NameContains=instance_name,
+            StatusEquals=status
+        )
+        return instance_name in [
+            ntbk['NotebookInstanceName'] for ntbk in notebooks_with_status['NotebookInstances']
+        ]
+
+    if _exists_with_status(instance_name, 'Pending'):
+        waiter = sm_client.get_waiter('notebook_instance_in_service')
+        waiter.wait(NotebookInstanceName=instance_name)
+
+    if _exists_with_status(instance_name, 'InService'):
         sm_client.stop_notebook_instance(
             NotebookInstanceName=instance_name
         )
         waiter = sm_client.get_waiter('notebook_instance_stopped')
         waiter.wait(NotebookInstanceName=instance_name)
 
+    if _exists_with_status(instance_name, 'Stopped'):
         sm_client.delete_notebook_instance(NotebookInstanceName=instance_name)
     else:
-        print(f'Warning! {instance_name} does not exist')
+        print(f'Warning! Cannot delete {instance_name}: not found in none of the states: pending, in service or stopped.')
 
 
 def delete_model(model_name):
@@ -296,9 +274,6 @@ def lambda_handler(event, context):
             print(str(instance))
             response_data = {
                 'SageMakerNotebookURL': f'https://{instance_name}.notebook.{region}.sagemaker.aws/tree?',
-                'NotebookName': config_with_data['data']['notebook_name'],
-                'ModelName': config_with_data['data']['model_name'],
-                'ModelEndpointName': config_with_data['data']['endpoint_name']
             }
             send_cfnresponse(event, context, CFN_SUCCESS, response_data)
         except Exception as ex:

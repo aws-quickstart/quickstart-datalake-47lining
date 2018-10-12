@@ -1,27 +1,15 @@
 [
   {
       "ParameterKey": "AvailabilityZones",
-      "ParameterValue": "$[taskcat_genaz_2]"
+      "ParameterValue": "$[alfred_genaz_2]"
   },
   {
-      "ParameterKey": "KeyPairName",
-      "ParameterValue": "$[alfred_getkeypair]"
-  },
-  {
-      "ParameterKey": "CreateDemonstration",
-      "ParameterValue": "yes"
-  },
-  {
-      "ParameterKey": "WizardInstanceType",
-      "ParameterValue": "t2.micro"
-  },
-  {
-      "ParameterKey": "WizardUserName",
-      "ParameterValue": "WebAppUser"
+      "ParameterKey": "QSS3BucketName",
+      "ParameterValue": "$[alfred_autobucket]"
   },
   {
       "ParameterKey": "WizardPassword",
-      "ParameterValue": "$[taskcat_genpass_16]"
+      "ParameterValue": "$[alfred_genpass_16]"
   },
   {
       "ParameterKey": "RedshiftUsername",
@@ -29,7 +17,7 @@
   },
   {
       "ParameterKey": "RedshiftPassword",
-      "ParameterValue": "$[taskcat_genpass_16]"
+      "ParameterValue": "$[alfred_genpass_16]"
   },
   {
       "ParameterKey": "RedshiftNodeType",
@@ -48,14 +36,6 @@
       "ParameterValue": "5439"
   },
   {
-      "ParameterKey": "DatasetS3BucketName",
-      "ParameterValue": "aws-quickstart-datasets"
-  },
-  {
-      "ParameterKey": "DatasetS3KeyPrefix",
-      "ParameterValue": "quickstart-datalake-47lining/ecommco/v2"
-  },
-  {
       "ParameterKey": "ElasticsearchNodeType",
       "ParameterValue": "t2.small.elasticsearch"
   },
@@ -72,6 +52,14 @@
       "ParameterValue": "QuickstartDefault"
   },
   {
+      "ParameterKey": "KinesisDataStreamName",
+      "ParameterValue": "streaming-submissions"
+  },
+  {
+      "ParameterKey": "KinesisDataStreamS3Prefix",
+      "ParameterValue": "streaming-submissions"
+  },
+  {
       "ParameterKey": "NotebookInstanceName",
       "ParameterValue": "SageMakerNotebookInstanceTestDev"
   },
@@ -82,5 +70,9 @@
   {
       "ParameterKey": "NotebookTrainingInstanceType",
       "ParameterValue": "ml.m5.2xlarge"
+  },
+  {
+      "ParameterKey": "KeyPairName",
+      "ParameterValue": "$[alfred_getkeypair]"
   }
 ]

@@ -8,12 +8,12 @@ global:
   reporting: true
 tests:
   multi-node-without-demonstration:
-    parameter_input: data-lake-without-demonstration-multi-node.json
+    parameter_input: data-lake-multi-node.json
     template_file: data-lake-master.yaml
     regions:
       - us-west-2
   single-node-with-wizard:
-    parameter_input: data-lake-with-demonstration-single-node.json
+    parameter_input: data-lake-single-node.json
     template_file: data-lake-master.yaml
     regions:
       - us-east-1
