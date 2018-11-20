@@ -2,17 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates AWS Glue resources.  **WARNING**  You will be billed for the
   AWS resources used if you create a stack from this template.
 Parameters:
-  AWSGlueCuratedDatasetsCrawlerRoleName:
-    Type: String
-  AWSGlueJobRoleName:
-    Type: String
-  SubmissionsBucketName:
-    Type: String
   CuratedBucketName:
-    Type: String
-  QSS3BucketName:
-    Type: String
-  QSS3KeyPrefix:
     Type: String
 Resources:
   DatalakeSubmissionsDatabase:
@@ -29,35 +19,8 @@ Resources:
       DatabaseInput:
         Name: datalake-curated-datasets
         Description: Data Lake Quick Start Curated Datasets
-  CuratedDatasetsCrawler:
-    Type: AWS::Glue::Crawler
-    Properties:
-      Role: !Ref 'AWSGlueCuratedDatasetsCrawlerRoleName'
-      DatabaseName: !Ref 'CuratedDatasetsDatabase'
-      Targets:
-        S3Targets:
-          - Path: !Sub 's3://${CuratedBucketName}/'
-            Exclusions:
-              - orders_stream/manifests/**
-              - '**_common_metadata'
-              - '**_metadata'
-  CuratedDatasetsJob:
-    Type: AWS::Glue::Job
-    Properties:
-      Command:
-        Name: glueetl
-        ScriptLocation: !Sub 's3://${QSS3BucketName}/${QSS3KeyPrefix}assets/glue/curated-datasets-job.py'
-      MaxRetries: 0
-      DefaultArguments:
-        --datalake_submissions_database_name: !Ref 'DatalakeSubmissionsDatabase'
-        --datalake_curated_datasets_database_name: !Ref 'CuratedDatasetsDatabase'
-        --datalake_curated_datasets_bucket_name: !Ref 'CuratedBucketName'
-        --job-bookmark-option: job-bookmark-disable
-      Role: !Ref 'AWSGlueJobRoleName'
 Outputs:
   CuratedDatasetsDatabaseName:
     Value: !Ref 'CuratedDatasetsDatabase'
-  CuratedDatasetsCrawlerName:
-    Value: !Ref 'CuratedDatasetsCrawler'
-  CuratedDatasetsJobName:
-    Value: !Ref 'CuratedDatasetsJob'
+  DatalakeSubmissionsDatabaseName:
+    Value: !Ref 'DatalakeSubmissionsDatabase'

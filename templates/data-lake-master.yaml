@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Data Lake Foundation is a QuickStart that provides a Data Lake architecture,
-  Redshift cluster, Elasticsearch domain, Data Lake walk-through wizard running on
-  AWS EC2 instance, in the same VPC through Cloudformation templates that provision
+  Redshift cluster, Elasticsearch domain, SageMaker in the same VPC through Cloudformation templates that provision
   and configure the required resources, including related QuickStarts. This template
   provisions all of the resources that are specific to the Quick Start.  Leveraged
   Quick Starts (VPC, LinuxBastion), if needed, can be provisioned by using the data-lake-foundation-master
@@ -16,15 +15,6 @@ Metadata:
           - AvailabilityZones
           - VPCDefinition
       - Label:
-          default: Demonstration Configuration
-        Parameters:
-          - CreateDemonstration
-          - WizardInstanceType
-          - WizardUserName
-          - WizardPassword
-          - DatasetS3BucketName
-          - DatasetS3KeyPrefix
-      - Label:
           default: Elasticsearch Configuration
         Parameters:
           - RemoteAccessCIDR
@@ -34,6 +24,7 @@ Metadata:
           default: Redshift Configuration
         Parameters:
           - EnableRedshift
+          - MakeRedshiftPubliclyAccessible
           - RedshiftUsername
           - RedshiftPassword
           - RedshiftNumberOfNodes
@@ -68,16 +59,10 @@ Metadata:
         default: Elasticsearch Node Type
       ElasticsearchNodeCount:
         default: Elasticsearch Node Count
-      CreateDemonstration:
-        default: Create Demonstration
-      WizardInstanceType:
-        default: Wizard Instance Type
-      WizardUserName:
-        default: Wizard User Name
-      WizardPassword:
-        default: Wizard Password
       EnableRedshift:
         default: Enable Redshift
+      MakeRedshiftPubliclyAccessible:
+        default: Make Redshift publicly accessible
       RedshiftUsername:
         default: Redshift User Name
       RedshiftPassword:
@@ -94,10 +79,6 @@ Metadata:
         default: Quick Start S3 Bucket Name
       QSS3KeyPrefix:
         default: Quick Start S3 Key Prefix
-      DatasetS3BucketName:
-        default: Dataset S3 Bucket Name
-      DatasetS3KeyPrefix:
-        default: Dataset S3 Key Prefix
       VPCDefinition:
         default: VPC Definition
       KinesisDataStreamName:
@@ -120,62 +101,15 @@ Mappings:
       PrivateSubnet2CIDR: 10.0.32.0/19
       NumberOfAZs: '2'
 Conditions:
-  CreateDemoResources: !Equals
-    - !Ref 'CreateDemonstration'
+  CreateRedshift: !Equals
+    - !Ref 'EnableRedshift'
     - 'yes'
-  CreateKinesisDataStream: !Equals
-    - !Ref 'CreateDemonstration'
-    - 'no'
-  CreateRedshift: !Or
-    - !Condition 'CreateDemoResources'
-    - !Equals
-      - !Ref 'EnableRedshift'
-      - 'yes'
 Parameters:
   AvailabilityZones:
     Description: The list of Availability Zones to use for the subnets in the VPC.
       You must specify two Availability Zones. By default, the Quick Start preserves
       the logical order you specify.
     Type: List<AWS::EC2::AvailabilityZone::Name>
-  CreateDemonstration:
-    AllowedValues:
-      - 'yes'
-      - 'no'
-    Default: 'yes'
-    Description: "Set this parameter to no if you don\u2019t want the Quick Start\
-      \ to deploy the data lake wizard and load sample data into the Amazon Redshift\
-      \ cluster and Kinesis streams. For more information about the wizard, see step\
-      \ 4. The following five parameters are used only if Create Demonstration is\
-      \ set to yes."
-    Type: String
-  DatasetS3BucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: Dataset bucket name can include numbers, lowercase letters,
-      uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).
-    Default: aws-quickstart-datasets
-    Description: S3 bucket where the sample dataset is installed. The bucket name
-      can include numbers, lowercase letters, uppercase letters, and hyphens, but
-      should not start or end with a hyphen. Use this parameter to specify the S3
-      bucket name that you would like the Quick Start to to load, if you decide to
-      use a different dataset, or if you decide to customize or extend the Quick Start
-      dataset. (For more information, see Using Your Own Dataset.) Keep the default
-      setting to use the sample dataset included with the Quick Start.
-    Type: String
-  DatasetS3KeyPrefix:
-    AllowedPattern: ^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$
-    ConstraintDescription: Dataset key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), and forward slash (/). It cannot start or end
-      with forward slash (/) because they are automatically appended.
-    Default: quickstart-datalake-47lining/ecommco/v2
-    Description: S3 key prefix where the sample dataset is installed. This prefix
-      can include numbers, lowercase letters, uppercase letters, hyphens, and forward
-      slashes, but should not start with a forward slash, which is automatically added.
-      Use this parameter to specify the location for the dataset you would like the
-      Quick Start to load, if you decide to use a different dataset, or if you decide
-      to customize or extend the Quick Start dataset. (For more information, see Using
-      Your Own Dataset.) Keep the default setting to use the sample dataset included
-      with the Quick Start.
-    Type: String
   ElasticsearchNodeCount:
     Default: '1'
     Description: The number of nodes in the Elasticsearch cluster. For guidance, see
@@ -199,26 +133,16 @@ Parameters:
       - 'yes'
       - 'no'
     Default: 'yes'
-    Description: "Specifies whether Amazon Redshift will be provisioned when the Create\
-      \ Demonstration parameter is set to no.  This parameter is ignored when Create\
-      \ Demonstration is set to yes (in that case, Amazon Redshift is always provisioned).\
-      \  Set to no if you\u2019ve set the Create Demonstration parameter to no, and\
-      \ you don\u2019t want to provision the Amazon Redshift cluster."
+    Description: "Specifies whether Amazon Redshift will be provisioned\
+      \  Set to no if you don\u2019t want to provision the Amazon Redshift cluster."
     Type: String
-  WizardInstanceType:
+  MakeRedshiftPubliclyAccessible:
     AllowedValues:
-      - t2.nano
-      - t2.micro
-      - t2.small
-      - t2.medium
-      - t2.large
-      - m3.large
-      - m3.xlarge
-      - m3.2xlarge
-    ConstraintDescription: must be a valid EC2 instance type.
-    Default: t2.micro
-    Description: The EC2 instance type for the data lake wizard. Required only if
-      Create Demonstration is set to "yes"
+    - 'yes'
+    - 'no'
+    Default: 'yes'
+    Description: "Specifies whether Amazon Redshift will be publicly accessible.\
+        \ Only applies if EnableRedshift is set to yes."
     Type: String
   KeyPairName:
     Description: Public/private key pairs allow you to securely connect to your instance
@@ -226,9 +150,7 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
   KinesisDataStreamName:
     Default: streaming-submissions
-    Description: "Name of the Kinesis data stream. Change this parameter only if you\u2019\
-      ve set the Create Demonstration parameter to no. Keep the default setting to\
-      \ use the sample dataset included with the Quick Start."
+    Description: "Name of the Kinesis data stream."
     Type: String
   KinesisDataStreamS3Prefix:
     AllowedPattern: ^[0-9a-zA-Z-]+(/[0-9a-zA-Z-]+)*$
@@ -237,8 +159,7 @@ Parameters:
       \ bucket. This prefix can include numbers, lowercase letters, uppercase letters,\
       \ hyphens, and forward slashes, but should not start with a forward slash, which\
       \ is automatically added. Use this parameter to specify the location for the\
-      \ streaming data you\u2019d like to load.  Change this parameter only if you\u2019\
-      ve set the Create Demonstration parameter to no. Keep the default setting to\
+      \ streaming data you\u2019d like to load. Keep the default setting to\
       \ use the sample dataset included with the Quick Start."
     Type: String
   QSS3BucketName:
@@ -342,27 +263,6 @@ Parameters:
       \ name. If you don\u2019t want to change the VPC configuration, keep the default\
       \ setting. For more information, see the Adding VPC Definitions section."
     Type: String
-  WizardPassword:
-    AllowedPattern: ^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[\x00-\x7F]*$
-    ConstraintDescription: Password must contain 8 to 64 ASCII characters. It must
-      contain 1 uppercase letter, 1 lowercase letter, and 1 number.
-    Description: The password for the wizard, consisting of 8-64 ASCII characters.
-      The password must contain one uppercase letter, one lowercase letter, and one
-      number.  This password is required, but will only be used only when you launch
-      the Quick Start with Create Demonstration set to "yes".
-    MaxLength: '64'
-    MinLength: '8'
-    NoEcho: 'true'
-    Type: String
-  WizardUserName:
-    AllowedPattern: ^[\x00-\x7F]*$
-    ConstraintDescription: User name must contain 1 to 64 ASCII characters.
-    Default: DataLakeUser
-    Description: The user name for the wizard. Consisting of 1-64 ASCII characters.
-      Required only if Create Demonstration is set to "yes"
-    MaxLength: '64'
-    MinLength: '1'
-    Type: String
   NotebookInstanceName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Must be unique within your account in an AWS Region.
@@ -418,13 +318,10 @@ Resources:
         AvailabilityZones: !Join
           - ','
           - !Ref 'AvailabilityZones'
-        CreateDemonstration: !Ref 'CreateDemonstration'
-        DatasetS3BucketName: !Ref 'DatasetS3BucketName'
-        DatasetS3KeyPrefix: !Ref 'DatasetS3KeyPrefix'
         ElasticsearchNodeCount: !Ref 'ElasticsearchNodeCount'
         ElasticsearchNodeType: !Ref 'ElasticsearchNodeType'
         EnableRedshift: !Ref 'EnableRedshift'
-        WizardInstanceType: !Ref 'WizardInstanceType'
+        MakeRedshiftPubliclyAccessible: !Ref 'MakeRedshiftPubliclyAccessible'
         KeyPairName: !Ref 'KeyPairName'
         KinesisDataStreamName: !Ref 'KinesisDataStreamName'
         KinesisDataStreamS3Prefix: !Ref 'KinesisDataStreamS3Prefix'
@@ -445,8 +342,6 @@ Resources:
         RemoteAccessCIDR: !Ref 'RemoteAccessCIDR'
         VPCCIDR: !GetAtt 'VPCStack.Outputs.VPCCIDR'
         VPCID: !GetAtt 'VPCStack.Outputs.VPCID'
-        WizardPassword: !Ref 'WizardPassword'
-        WizardUserName: !Ref 'WizardUserName'
         NotebookInstanceName: !Ref 'NotebookInstanceName'
         NotebookInstanceType: !Ref 'NotebookInstanceType'
         NotebookTrainingInstanceType: !Ref 'NotebookTrainingInstanceType'
@@ -486,10 +381,6 @@ Resources:
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template'
     Type: AWS::CloudFormation::Stack
 Outputs:
-  DataLakeWizardURL:
-    Description: Data Lake wizard walk-through wizard URL
-    Condition: CreateDemoResources
-    Value: !GetAtt 'DataLakeFoundationStack.Outputs.DataLakeWizardURL'
   SubmissionsBucketName:
     Description: Bucket name for submissions
     Value: !GetAtt 'DataLakeFoundationStack.Outputs.SubmissionsBucketName'
@@ -508,9 +399,7 @@ Outputs:
     Value: !GetAtt 'DataLakeFoundationStack.Outputs.ElasticsearchEndpoint'
   KinesisDataStreamName:
     Description: Kinesis data stream name
-    Condition: CreateKinesisDataStream
     Value: !GetAtt 'DataLakeFoundationStack.Outputs.KinesisDataStreamName'
   SageMakerNotebookURL:
     Description: SageMaker Notebook Instance URL
-    Condition: CreateDemoResources
     Value: !GetAtt 'DataLakeFoundationStack.Outputs.SageMakerNotebookURL'
