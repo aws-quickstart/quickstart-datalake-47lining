@@ -70,6 +70,12 @@ Mappings:
       KinesisFirehoseCIDR: 52.70.63.192/27
     us-west-2:
       KinesisFirehoseCIDR: 52.89.255.224/27
+    eu-west-1:
+      KinesisFirehoseCIDR: 52.19.239.192/27
+    eu-central-1:
+      KinesisFirehoseCIDR: 35.158.127.160/27
+    ap-southeast-1:
+      KinesisFirehoseCIDR: 13.228.64.192/27
 Conditions:
   IsMultiNodeCluster: !Not
     - !Equals
