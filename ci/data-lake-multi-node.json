@@ -58,18 +58,5 @@
   {
       "ParameterKey": "KinesisDataStreamS3Prefix",
       "ParameterValue": "streaming-submissions"
-  },
-  {
-      "ParameterKey": "WizardPassword",
-<<<<<<< HEAD:ci/data-lake-without-demonstration-multi-node.json
-      "ParameterValue": "$[taskcat_genpass_16]"
-  },
-  {
-      "ParameterKey": "QSS3BucketName",
-      "ParameterValue": "aws-quickstart"
-=======
-      "ParameterValue": "$[alfred_genpass_16]"
-
->>>>>>> pr22:ci/data-lake-multi-node.json
   }
 ]

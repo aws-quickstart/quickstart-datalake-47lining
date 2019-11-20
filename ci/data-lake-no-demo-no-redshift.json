@@ -8,22 +8,6 @@
     "ParameterValue": "override"
   },
   {
-    "ParameterKey": "CreateDemonstration",
-    "ParameterValue": "no"
-  },
-  {
-    "ParameterKey": "WizardInstanceType",
-    "ParameterValue": "t2.micro"
-  },
-  {
-    "ParameterKey": "WizardUserName",
-    "ParameterValue": "WebAppUser"
-  },
-  {
-    "ParameterKey": "WizardPassword",
-    "ParameterValue": ""
-  },
-  {
     "ParameterKey": "EnableRedshift",
     "ParameterValue": "no"
   },
@@ -50,14 +34,6 @@
   {
     "ParameterKey": "RedshiftDatabasePort",
     "ParameterValue": "5439"
-  },
-  {
-    "ParameterKey": "DatasetS3BucketName",
-    "ParameterValue": "aws-quickstart-datasets"
-  },
-  {
-    "ParameterKey": "DatasetS3KeyPrefix",
-    "ParameterValue": "quickstart-datalake-47lining/ecommco/v2"
   },
   {
     "ParameterKey": "ElasticsearchNodeType",

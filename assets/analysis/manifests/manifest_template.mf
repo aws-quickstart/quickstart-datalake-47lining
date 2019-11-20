@@ -1,0 +1,10 @@
+{
+    "fileLocations": [{
+        "URIPrefixes": ["https://s3.amazonaws.com/{{ published_bucket_name }}/{{ path }}"]
+     }],
+     "globalUploadSettings": {
+        "format": "CSV",
+        "containsHeader": true,
+        "delimiter": ","
+     }
+}

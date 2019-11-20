@@ -8,10 +8,6 @@
       "ParameterValue": "$[alfred_autobucket]"
   },
   {
-      "ParameterKey": "WizardPassword",
-      "ParameterValue": "$[alfred_genpass_16]"
-  },
-  {
       "ParameterKey": "RedshiftUsername",
       "ParameterValue": "datalake"
   },
@@ -72,12 +68,7 @@
       "ParameterValue": "ml.m5.2xlarge"
   },
   {
-<<<<<<< HEAD:ci/data-lake-with-demonstration-single-node.json
-      "ParameterKey": "QSS3BucketName",
-      "ParameterValue": "aws-quickstart"
-=======
       "ParameterKey": "KeyPairName",
       "ParameterValue": "$[alfred_getkeypair]"
->>>>>>> pr22:ci/data-lake-single-node.json
   }
 ]
