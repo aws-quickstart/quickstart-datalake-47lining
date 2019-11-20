@@ -56,7 +56,7 @@ Resources:
           - Sid: StatementId
             Effect: Allow
             Principal:
-              AWS: "*"
+              AWS: !Ref 'AWS::AccountId'
             Action: sns:Publish
             Resource: !Ref "CuratedTopic"
             Condition:
@@ -83,7 +83,7 @@ Resources:
           - Sid: StatementId
             Effect: Allow
             Principal:
-              AWS: "*"
+              AWS: !Ref 'AWS::AccountId'
             Action: sns:Publish
             Resource: !Ref "PublishedTopic"
             Condition:
