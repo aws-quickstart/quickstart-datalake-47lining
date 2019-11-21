@@ -132,7 +132,7 @@ Resources:
                   - !Ref "NAT2ElasticIP"
             Effect: Allow
             Principal: "*"
-            Resource: !GetAtt "RedshiftCluster"
+            Resource: !Ref "RedshiftCluster"
         Version: "2012-10-17"
       AdvancedOptions:
         rest.action.multi.allow_explicit_index: "true"
