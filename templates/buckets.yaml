@@ -1,11 +1,11 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemp
+lateFormatVersion: "2010-09-09"
 Description:
   AWS CloudFormation templates to create S3 buckets. **WARNING** You will
   be billed for data stored in AWS S3 buckets if you create a stack from this template.
   (qs-1nlkhq1nj)
 Parameters:
-  RandomStringArn:
-    Description: The ARN for the function that will generate the random value to be used in the naming of the S3 Buckets
+  RandomStringA: The ARN for the function that will generate the random value to be used in the naming of the S3 Buckets
     Type: String
 Resources:
   RandomString:
@@ -136,7 +136,8 @@ Resources:
           - Sid: StatementId
             Effect: Allow
             Principal:
-              AWS: "*"
+               Principal:
+                AWS: !Ref 'AWS::AccountId'
             Action: sns:Publish
             Resource: !Ref "SubmissionsTopic"
             Condition:
