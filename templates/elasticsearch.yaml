@@ -132,6 +132,7 @@ Resources:
                   - !Ref "NAT2ElasticIP"
             Effect: Allow
             Principal: "*"
+            Resource: "arn:aws:es:AWS-REGION:ACCOUNT-id:*"
         Version: "2012-10-17"
       AdvancedOptions:
         rest.action.multi.allow_explicit_index: "true"

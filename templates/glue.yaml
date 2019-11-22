@@ -1,9 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates AWS Glue resources.  **WARNING**  You will be billed for the
   AWS resources used if you create a stack from this template.
-Parameters:
-  CuratedBucketName:
-    Type: String
 Resources:
   DatalakeSubmissionsDatabase:
     Type: AWS::Glue::Database

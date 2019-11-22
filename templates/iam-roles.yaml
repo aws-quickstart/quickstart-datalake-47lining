@@ -343,9 +343,6 @@ Conditions:
     - !Ref 'EnableRedshift'
     - 'yes'
 Parameters:
-  AthenaQueryResultsBucketARN:
-    Description: RegionalLambdaBucket bucket ARN
-    Type: String
   EnableRedshift:
     AllowedValues:
       - 'yes'
