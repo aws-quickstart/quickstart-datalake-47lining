@@ -87,6 +87,8 @@ Mappings:
       KinesisFirehoseCIDR: 35.158.127.160/27
     ap-southeast-1:
       KinesisFirehoseCIDR: 13.228.64.192/27
+    ap-southeast-2:
+      KinesisFirehoseCIDR: 13.210.67.224/27
 Conditions:
   IsMultiNodeCluster: !Not
     - !Equals
