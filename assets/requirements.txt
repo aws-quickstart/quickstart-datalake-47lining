@@ -1,4 +1,4 @@
 boto3==1.7.19
 awscli==1.11.84
-jinja2==2.10.1
+jinja2==2.11.3
 psycopg2==2.7.1
